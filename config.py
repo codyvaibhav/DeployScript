@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import os
 from datetime import datetime
 
 MODELS = {
@@ -10,43 +11,44 @@ MODELS = {
 main = 'A37'
 base = 'A36'
 n    = 59
-
 marketing_name = f'Galaxy {main}'
 last_updated   = datetime.now().strftime("%d %b %Y")
 
-base_dir                 = rf".\{main} Data"
-file_path                = rf"{base_dir}\raw_mainA37.xlsx"
-comparison_path_overall  = rf"{base_dir}\overallA37.xlsx"
-comparison_path_domestic = rf"{base_dir}\overallA37.xlsx"
-comparison_path_export   = rf"{base_dir}\overallA37.xlsx"
-file_base_path           = rf"{base_dir}\raw_baseA37.xlsx"
-asrdata_path             = rf"{base_dir}\asr_compareA37.xlsx"
-msclist_path             = rf"{base_dir}\MSC_listA37.xlsx"
-
+base_dir = None
+file_path = None
+comparison_path_overall = None
+comparison_path_domestic = None
+comparison_path_export = None
+file_base_path = None
+asrdata_path = None
+msclist_path = None
 
 def configure(model_key: str):
-    """Switch the active model and refresh all derived path variables.
-    Call this from main.py before any page renders."""
+    """Switch the active model and refresh all derived path variables."""
     global main, base, n, marketing_name, last_updated
     global base_dir, file_path, comparison_path_overall
     global comparison_path_domestic, comparison_path_export
-    global file_base_path, asrdata_path
+    global file_base_path, asrdata_path, msclist_path
 
-    cfg            = MODELS[model_key]
-    main           = cfg['main']
-    base           = cfg['base']
-    n              = cfg['n']
+    cfg = MODELS[model_key]
+    main = cfg['main']
+    base = cfg['base']
+    n = cfg['n']
     marketing_name = f'Galaxy {main}'
-    last_updated   = datetime.now().strftime("%d %b %Y")
+    last_updated = datetime.now().strftime("%d %b %Y")
 
-    base_dir = rf".\{main} Data"
-    file_path = rf"{base_dir}\raw_mainA37.xlsx"
-    comparison_path_overall = rf"{base_dir}\overallA37.xlsx"
-    comparison_path_domestic = rf"{base_dir}\overallA37.xlsx"
-    comparison_path_export = rf"{base_dir}\overallA37.xlsx"
-    file_base_path = rf"{base_dir}\raw_baseA37.xlsx"
-    asrdata_path = rf"{base_dir}\asr_compareA37.xlsx"
-    msclist_path = rf"{base_dir}\MSC_listA37.xlsx"
+    # Get the directory of this config.py file
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    base_dir = os.path.join(script_dir, f"{main} Data")
+
+    # Construct paths using OS-independent joins
+    file_path = os.path.join(base_dir, f"raw_main{main}.xlsx")
+    comparison_path_overall = os.path.join(base_dir, f"overall{main}.xlsx")
+    comparison_path_domestic = os.path.join(base_dir, f"overall{main}.xlsx")  # Adjust if different
+    comparison_path_export = os.path.join(base_dir, f"overall{main}.xlsx")    # Adjust if different
+    file_base_path = os.path.join(base_dir, f"raw_base{main}.xlsx")
+    asrdata_path = os.path.join(base_dir, f"asr_compare{main}.xlsx")
+    msclist_path = os.path.join(base_dir, f"MSC_list{main}.xlsx")
 
 #------------------------------------------------------
 
