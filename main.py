@@ -1,5 +1,7 @@
+import os
 import streamlit as st
-import config                            # ← import module so config.main always reflects the active model
+import config  # ← import module so config.main always reflects the active model
+
 import warnings
 warnings.filterwarnings('ignore', category=UserWarning, message="Workbook contains no default style*")
 
@@ -14,74 +16,68 @@ if 'active_model' not in st.session_state:
 config.configure(st.session_state.active_model)
 
 # ── CSS ───────────────────────────────────────────────────────────────────────
-with open("style.css") as f:
+# FIX #5: use __file__-relative path so it works on Streamlit Cloud
+_css_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "style.css")
+with open(_css_path) as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # Extra CSS for the model selectbox
 st.markdown(
     """
     <style>
-        div.stElementContainer.st-key-_model_sel > div.stSelectbox[data-testid="stSelectbox"] {
-            background: linear-gradient(135deg, #e6f0ff 0%, #d1e7ff 100%);
-            border: 2px solid #0d6efd;
-            border-radius: 10px;
-            font-family: 'Inter', sans-serif;
-            font-weight: 900;
-            color: #0a58ca;
-            transition: all 0.3s ease;
-            padding: 4px 12px;
-        }
-
-        div.stElementContainer.st-key-_model_sel > div.stSelectbox[data-testid="stSelectbox"]:hover {
-            border-color: #0b5ed7;
-            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.25);
-        }
-
-        div.stElementContainer.st-key-_model_sel > div.stSelectbox[data-testid="stSelectbox"] label {
-            font-family: 'Inter', sans-serif;
-            font-size: 1rem;
-            font-weight: 600;
-            color: #0d6efd;
-            letter-spacing: 0.03em;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-
-        /* Dropdown arrow color */
-        div.stElementContainer.st-key-_model_sel > div.stSelectbox[data-testid="stSelectbox"] svg {
-            fill: #0d6efd;
-        }
+    div.stElementContainer.st-key-_model_sel > div.stSelectbox[data-testid="stSelectbox"] {
+        background: linear-gradient(135deg, #e6f0ff 0%, #d1e7ff 100%);
+        border: 2px solid #0d6efd;
+        border-radius: 10px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 900;
+        color: #0a58ca;
+        transition: all 0.3s ease;
+        padding: 4px 12px;
+    }
+    div.stElementContainer.st-key-_model_sel > div.stSelectbox[data-testid="stSelectbox"]:hover {
+        border-color: #0b5ed7;
+        box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.25);
+    }
+    div.stElementContainer.st-key-_model_sel > div.stSelectbox[data-testid="stSelectbox"] label {
+        font-family: 'Inter', sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #0d6efd;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+    /* Dropdown arrow color */
+    div.stElementContainer.st-key-_model_sel > div.stSelectbox[data-testid="stSelectbox"] svg {
+        fill: #0d6efd;
+    }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-
 st.markdown(f"""
 <div class="fdm-header">
-
-  <!-- LEFT: FDM Logo -->
-  <div class="fdm-logo">
-    <span class="fdm-logo-mark">QIMS</span>
-    <span class="fdm-logo-sub">Quality Intelligence Monitoring System</span>
-  </div>
-
-  <!-- CENTER: Dashboard Title -->
-  <div class="fdm-title-block">
-    <h1>Quality Intelligence Monitoring System</h1>
-  </div>
-
-  <!-- RIGHT: Model & timestamp -->
-  <div class="fdm-meta">
-    <div class="model-tag">Model:<span>{config.marketing_name}</span></div>
-    <div class="update-tag">⟳ Last updated: {config.last_updated}</div>
-  </div>
-
+    <!-- LEFT: FDM Logo -->
+    <div class="fdm-logo">
+        <span class="fdm-logo-mark">QIMS</span>
+        <span class="fdm-logo-sub">Quality Intelligence Monitoring System</span>
+    </div>
+    <!-- CENTER: Dashboard Title -->
+    <div class="fdm-title-block">
+        <h1>Quality Intelligence Monitoring System</h1>
+    </div>
+    <!-- RIGHT: Model & timestamp -->
+    <div class="fdm-meta">
+        <div class="model-tag">Model:<span>{config.marketing_name}</span></div>
+        <div class="update-tag">⟳ Last updated: {config.last_updated}</div>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
 # ── Navigation ────────────────────────────────────────────────────────────────
-from pages2 import summary, analysis, improvement   # imported after config is set
+from pages2 import summary, analysis, improvement  # imported after config is set
 
 header_container = st.container()
 with header_container:
@@ -134,7 +130,6 @@ with header_container:
                 }
             }
         )
-
     except ImportError:
         selected = st.radio(
             "Navigation",
@@ -144,7 +139,7 @@ with header_container:
             label_visibility="collapsed",
         )
 
-l,r = st.columns([1,6])
+l, r = st.columns([1, 6])
 with l:
     def _on_model_change():
         new_key = st.session_state._model_sel
@@ -155,7 +150,7 @@ with l:
     st.selectbox(
         "Model",
         options=_model_keys,
-        format_func=lambda k: f"  {_model_labels[k]}",
+        format_func=lambda k: f" {_model_labels[k]}",
         key="_model_sel",
         index=_model_keys.index(st.session_state.active_model),
         on_change=_on_model_change,
