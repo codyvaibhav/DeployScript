@@ -14,14 +14,14 @@ n    = 59
 marketing_name = f'Galaxy {main}'
 last_updated   = datetime.now().strftime("%d %b %Y")
 
-base_dir                 = rf".\{main} Data\{n}days"
-file_path                = rf"{base_dir}\raw_main.xlsx"
-comparison_path_overall  = rf"{base_dir}\overall.xlsx"
-comparison_path_domestic = rf"{base_dir}\domestic.xlsx"
-comparison_path_export   = rf"{base_dir}\export.xlsx"
-file_base_path           = rf"{base_dir}\raw_base.xlsx"
-asrdata_path             = rf"{base_dir}\asr_compare.xlsx"
-msclist_path             = r".\MSC_list.xlsx"
+base_dir                 = rf".\{main} Data"
+file_path                = rf"{base_dir}\raw_mainA37.xlsx"
+comparison_path_overall  = rf"{base_dir}\overallA37.xlsx"
+comparison_path_domestic = rf"{base_dir}\overallA37.xlsx"
+comparison_path_export   = rf"{base_dir}\overallA37.xlsx"
+file_base_path           = rf"{base_dir}\raw_baseA37.xlsx"
+asrdata_path             = rf"{base_dir}\asr_compareA37.xlsx"
+msclist_path             = rf"{base_dir}\MSC_listA37.xlsx"
 
 
 def configure(model_key: str):
@@ -39,13 +39,14 @@ def configure(model_key: str):
     marketing_name = f'Galaxy {main}'
     last_updated   = datetime.now().strftime("%d %b %Y")
 
-    base_dir                 = rf".\{main} Data\{n}days"
-    file_path                = rf"{base_dir}\raw_main.xlsx"
-    comparison_path_overall  = rf"{base_dir}\overall.xlsx"
-    comparison_path_domestic = rf"{base_dir}\domestic.xlsx"
-    comparison_path_export   = rf"{base_dir}\export.xlsx"
-    file_base_path           = rf"{base_dir}\raw_base.xlsx"
-    asrdata_path             = rf"{base_dir}\asr_compare.xlsx"
+    base_dir = rf".\{main} Data"
+    file_path = rf"{base_dir}\raw_mainA37.xlsx"
+    comparison_path_overall = rf"{base_dir}\overallA37.xlsx"
+    comparison_path_domestic = rf"{base_dir}\overallA37.xlsx"
+    comparison_path_export = rf"{base_dir}\overallA37.xlsx"
+    file_base_path = rf"{base_dir}\raw_baseA37.xlsx"
+    asrdata_path = rf"{base_dir}\asr_compareA37.xlsx"
+    msclist_path = rf"{base_dir}\MSC_listA37.xlsx"
 
 #------------------------------------------------------
 
