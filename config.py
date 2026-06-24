@@ -42,13 +42,13 @@ def configure(model_key: str):
     base_dir = os.path.join(script_dir, f"{main} Data")
 
     # Construct paths using OS-independent joins
-    file_path = os.path.join(base_dir, f"raw_main{main}.xlsx")
-    comparison_path_overall = os.path.join(base_dir, f"overall{main}.xlsx")
-    comparison_path_domestic = os.path.join(base_dir, f"overall{main}.xlsx")  # Adjust if different
-    comparison_path_export = os.path.join(base_dir, f"overall{main}.xlsx")    # Adjust if different
-    file_base_path = os.path.join(base_dir, f"raw_base{main}.xlsx")
-    asrdata_path = os.path.join(base_dir, f"asr_compare{main}.xlsx")
-    msclist_path = os.path.join(base_dir, f"MSC_list{main}.xlsx")
+    file_path = os.path.join(base_dir, f"raw_mainA37.xlsx")
+    comparison_path_overall = os.path.join(base_dir, f"overallA37.xlsx")
+    comparison_path_domestic = os.path.join(base_dir, f"overallA37.xlsx")
+    comparison_path_export = os.path.join(base_dir, f"overallA37.xlsx")
+    file_base_path = os.path.join(base_dir, f"raw_baseA37.xlsx")
+    asrdata_path = os.path.join(base_dir, f"asr_compareA37.xlsx")
+    msclist_path = os.path.join(base_dir, f"MSC_listA37.xlsx")
 
 #------------------------------------------------------
 
