@@ -4,15 +4,15 @@ import os
 from datetime import datetime
 
 MODELS = {
-    'A37':  {'main': 'A37',  'base': 'A36',  'n': 59, 'label': 'Galaxy A37'},
+    'A37': {'main': 'A37', 'base': 'A36', 'n': 59, 'label': 'Galaxy A37'},
 }
 
 # ── Active Model Defaults (updated at runtime via configure())
 main = 'A37'
 base = 'A36'
-n    = 59
+n = 59
 marketing_name = f'Galaxy {main}'
-last_updated   = datetime.now().strftime("%d %b %Y")
+last_updated = datetime.now().strftime("%d %b %Y")
 
 base_dir = None
 file_path = None
@@ -23,12 +23,17 @@ file_base_path = None
 asrdata_path = None
 msclist_path = None
 
+# FIX #3: launch_date must be a real module-level variable so get_asrdata() can reference it
+launch_date = None
+
+
 def configure(model_key: str):
     """Switch the active model and refresh all derived path variables."""
     global main, base, n, marketing_name, last_updated
     global base_dir, file_path, comparison_path_overall
     global comparison_path_domestic, comparison_path_export
     global file_base_path, asrdata_path, msclist_path
+    global launch_date  # FIX #3: must be declared global here too
 
     cfg = MODELS[model_key]
     main = cfg['main']
@@ -39,39 +44,52 @@ def configure(model_key: str):
 
     # Get the directory of this config.py file
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    base_dir = os.path.join(script_dir, f"{main} Data")
+
+    # FIX #2: folder in repo is "A37 data" (lowercase d) — match exactly
+    base_dir = os.path.join(script_dir, f"{main} data")
 
     # Construct paths using OS-independent joins
-    file_path = os.path.join(base_dir, f"raw_mainA37.xlsx")
-    comparison_path_overall = os.path.join(base_dir, f"overallA37.xlsx")
+    file_path                = os.path.join(base_dir, f"raw_mainA37.xlsx")
+    comparison_path_overall  = os.path.join(base_dir, f"overallA37.xlsx")
     comparison_path_domestic = os.path.join(base_dir, f"overallA37.xlsx")
-    comparison_path_export = os.path.join(base_dir, f"overallA37.xlsx")
-    file_base_path = os.path.join(base_dir, f"raw_baseA37.xlsx")
-    asrdata_path = os.path.join(base_dir, f"asr_compareA37.xlsx")
-    msclist_path = os.path.join(base_dir, f"MSC_listA37.xlsx")
+    comparison_path_export   = os.path.join(base_dir, f"overallA37.xlsx")
+    file_base_path           = os.path.join(base_dir, f"raw_baseA37.xlsx")
+    asrdata_path             = os.path.join(base_dir, f"asr_compareA37.xlsx")
+    msclist_path             = os.path.join(base_dir, f"MSC_listA37.xlsx")
 
-#------------------------------------------------------
+    # FIX #1 & #3: read launch_date here (after paths are set) so the module
+    # never crashes on import and launch_date is always fresh after configure().
+    try:
+        _df3, _sell_out, _launch = get_domestic_comparison_data()
+        launch_date = _launch
+    except Exception:
+        launch_date = None
+
+
+# ── Data helpers ──────────────────────────────────────────────────────────────
 
 def get_data():
     df = pd.read_excel(file_path, skiprows=9)
     df.columns = df.columns.str.replace('\n', ' ')
     df = df.replace("착하판정", "Return")
-    df['ASC Code'] = df['ASC Code'].replace([np.inf, -np.inf], 0)  # Replace inf with 0
+    df['ASC Code'] = df['ASC Code'].replace([np.inf, -np.inf], 0)
     df['TR NO'] = df['TR NO'].astype(int)
     df['ASC Code'] = np.where(df['ASC Code'].isna(), df['TR NO'], df['ASC Code'])
-    # df['ASC Code'] = df['ASC Code'].fillna(0)  # Replace NaN with 0
-    df['ASC Code'] = df['ASC Code'].astype(int)  # float64 -> int64
+    df['ASC Code'] = df['ASC Code'].astype(int)
     df['Repair Description'] = df['Repair Description'].fillna('Return')
     df["Service Date"] = df["Service Date"].astype(str)
     df['Date'] = pd.to_datetime("20" + df['Service Date'], format='%Y%m%d', errors='coerce')
-    df = df.dropna(subset=['Date'])  # Remove invalid dates
-    df3, sell_out_domestic, launch_date = get_domestic_comparison_data()
-    if not isinstance(launch_date, pd.Timestamp):
-        launch_date = pd.to_datetime(launch_date)
-    df['Day'] = (df['Date'] - launch_date).dt.days + 1
+    df = df.dropna(subset=['Date'])
+
+    _df3, _sell_out_domestic, _launch_date = get_domestic_comparison_data()
+    if not isinstance(_launch_date, pd.Timestamp):
+        _launch_date = pd.to_datetime(_launch_date)
+
+    df['Day'] = (df['Date'] - _launch_date).dt.days + 1
     df['week_num'] = df['Date'].dt.isocalendar().week
     df['WK'] = 'WK ' + df['week_num'].astype(str)
     return df
+
 
 def get_overall_comparison_data():
     df2 = pd.read_excel(comparison_path_overall, sheet_name='Sheet2')
@@ -91,6 +109,7 @@ def get_overall_comparison_data():
     df2.iloc[6, 2] = improvement
     return df2, improvement, sell_out_overall
 
+
 def get_domestic_comparison_data():
     df3 = pd.read_excel(comparison_path_domestic, sheet_name='Sheet2')
     df3.columns = [str(col) for col in df3.columns]
@@ -107,10 +126,14 @@ def get_domestic_comparison_data():
     else:
         improvement = f"<span style='color: #e55039;'>{improvement}</span>"
     df3.iloc[6, 2] = improvement
-    launch_date = df3.iloc[1,2]
-    return df3, sell_out_domestic, launch_date
+    _launch_date = df3.iloc[1, 2]
+    return df3, sell_out_domestic, _launch_date
 
-df3, sell_out_domestic, launch_date = get_domestic_comparison_data()
+
+# FIX #1: REMOVED the bare module-level call that crashed on import:
+#   df3, sell_out_domestic, launch_date = get_domestic_comparison_data()
+# launch_date is now set safely inside configure() above.
+
 
 def get_export_comparison_data():
     df4 = pd.read_excel(comparison_path_export, sheet_name='Sheet2')
@@ -130,20 +153,22 @@ def get_export_comparison_data():
     df4.iloc[6, 2] = improvement
     return df4, sell_out_export
 
+
 def get_base_data():
     df_base = pd.read_excel(file_base_path, skiprows=9)
     df_base.columns = df_base.columns.str.replace('\n', ' ')
     df_base = df_base.replace("착하판정", "Return")
-    df_base['ASC Code'] = df_base['ASC Code'].replace([np.inf, -np.inf], 0)  # Replace inf with 0
-    df_base['ASC Code'] = df_base['ASC Code'].fillna(0)  # Replace NaN with 0
-    df_base['ASC Code'] = df_base['ASC Code'].astype(int)  # float64 -> int64
+    df_base['ASC Code'] = df_base['ASC Code'].replace([np.inf, -np.inf], 0)
+    df_base['ASC Code'] = df_base['ASC Code'].fillna(0)
+    df_base['ASC Code'] = df_base['ASC Code'].astype(int)
     df_base['Repair Description'] = df_base['Repair Description'].fillna('Return')
     df_base["Service Date"] = df_base["Service Date"].astype(str)
     df_base['Date'] = pd.to_datetime("20" + df_base['Service Date'], format='%Y%m%d', errors='coerce')
-    df_base = df_base.dropna(subset=['Date'])  # Remove invalid dates
+    df_base = df_base.dropna(subset=['Date'])
     df_base['week_num'] = df_base['Date'].dt.isocalendar().week
     df_base['WK'] = 'WK ' + df_base['week_num'].astype(str)
     return df_base
+
 
 def get_asrdata():
     df5 = pd.read_excel(asrdata_path, skiprows=9, header=None)
@@ -155,6 +180,7 @@ def get_asrdata():
     numeric_cols = ["main_service", "main_sell_out", "base_service", "base_sell_out"]
     for col in numeric_cols:
         df5[col] = pd.to_numeric(df5[col], errors='coerce')
+
     df5["main_ratio"] = (
         (df5["main_service"] / df5["main_sell_out"] * 100)
         .round(3)
@@ -168,12 +194,17 @@ def get_asrdata():
         .apply(lambda x: "{:.3f}".format(x))
     )
     df5['base_ratio'] = pd.to_numeric(df5['base_ratio'], errors='coerce')
-    df5['Defect Date'] = pd.Timestamp(launch_date) + pd.to_timedelta(df5['Day'] - 1, unit='D')
 
-    # Calculate dates and format as "WK {week_number}"
-    df5['Week'] = (pd.Timestamp(launch_date) + pd.to_timedelta(df5["Day"] - 1, unit='D')
-                   ).dt.isocalendar().week.apply(lambda x: f'WK {x}')
+    # FIX #3: use the module-level launch_date (set by configure()) safely
+    _ld = pd.Timestamp(launch_date) if launch_date is not None else pd.Timestamp.now()
+    df5['Defect Date'] = _ld + pd.to_timedelta(df5['Day'] - 1, unit='D')
+    df5['Week'] = (
+        (_ld + pd.to_timedelta(df5["Day"] - 1, unit='D'))
+        .dt.isocalendar().week
+        .apply(lambda x: f'WK {x}')
+    )
     return df5
+
 
 def get_msclist():
     df6 = pd.read_excel(msclist_path)
