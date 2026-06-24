@@ -69,7 +69,7 @@ def configure(model_key: str):
 # ── Data helpers ──────────────────────────────────────────────────────────────
 
 def get_data():
-    df = pd.read_excel(file_path, skiprows=9)
+    df = pd.read_excel(file_path, skiprows=9, engine='openpyxl')
     df.columns = df.columns.str.replace('\n', ' ')
     df = df.replace("착하판정", "Return")
     df['ASC Code'] = df['ASC Code'].replace([np.inf, -np.inf], 0)
@@ -92,7 +92,7 @@ def get_data():
 
 
 def get_overall_comparison_data():
-    df2 = pd.read_excel(comparison_path_overall, sheet_name='Sheet2')
+    df2 = pd.read_excel(comparison_path_overall, sheet_name='Sheet2', engine='openpyxl')
     df2.columns = [str(col) for col in df2.columns]
     df2 = df2.fillna('')
     df2 = df2.rename(columns={
@@ -111,7 +111,7 @@ def get_overall_comparison_data():
 
 
 def get_domestic_comparison_data():
-    df3 = pd.read_excel(comparison_path_domestic, sheet_name='Sheet2')
+    df3 = pd.read_excel(comparison_path_domestic, sheet_name='Sheet2', engine='openpyxl')
     df3.columns = [str(col) for col in df3.columns]
     df3 = df3.fillna('')
     df3 = df3.rename(columns={
@@ -136,7 +136,7 @@ def get_domestic_comparison_data():
 
 
 def get_export_comparison_data():
-    df4 = pd.read_excel(comparison_path_export, sheet_name='Sheet2')
+    df4 = pd.read_excel(comparison_path_export, sheet_name='Sheet2', engine='openpyxl')
     df4.columns = [str(col) for col in df4.columns]
     df4 = df4.fillna('')
     df4 = df4.rename(columns={
@@ -155,7 +155,7 @@ def get_export_comparison_data():
 
 
 def get_base_data():
-    df_base = pd.read_excel(file_base_path, skiprows=9)
+    df_base = pd.read_excel(file_base_path, skiprows=9, engine='openpyxl')
     df_base.columns = df_base.columns.str.replace('\n', ' ')
     df_base = df_base.replace("착하판정", "Return")
     df_base['ASC Code'] = df_base['ASC Code'].replace([np.inf, -np.inf], 0)
@@ -171,7 +171,7 @@ def get_base_data():
 
 
 def get_asrdata():
-    df5 = pd.read_excel(asrdata_path, skiprows=9, header=None)
+    df5 = pd.read_excel(asrdata_path, skiprows=9, header=None, engine='openpyxl')
     df5 = df5.iloc[:, :5]
     df5.columns = ["Days", "main_service", "main_sell_out", "base_service", "base_sell_out"]
     df5 = df5.dropna(subset=['Days'])
@@ -207,5 +207,5 @@ def get_asrdata():
 
 
 def get_msclist():
-    df6 = pd.read_excel(msclist_path)
+    df6 = pd.read_excel(msclist_path, engine='openpyxl')
     return df6
